@@ -1,0 +1,564 @@
+/* YTM Restyle: look, declutter, clean controls, ambient mode.
+   content.js paints the ambient canvas and applies the popup settings.
+   Each group below is on by default. The popup turns a group off with a
+   class on <html>: ytmx-no-look, ytmx-no-layout, ytmx-no-declutter, ytmx-no-dim,
+   ytmx-no-ambient, ytmx-no-panels, ytmx-no-nowplaying, ytmx-no-home,
+   ytmx-no-playerbar. */
+
+/* ---------- Knobs: the popup sets these values ---------- */
+html {
+  --ytmx-bg: #0b0b0f;
+  --ytmx-glass: rgba(14, 14, 20, 0.72);
+  --ytmx-radius: 10px;
+  --ytmx-ambient-opacity: 0.55;
+  --ytmx-ambient-blur: 48px;
+  --ytmx-font: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Display",
+    system-ui, "Segoe UI", Roboto, sans-serif;
+}
+
+/* ---------- Look ---------- */
+
+html:not(.ytmx-no-look) {
+  /* The site reads its surface colors from these variables. */
+  --ytmusic-general-background-c: var(--ytmx-bg) !important;
+  --ytmusic-background: var(--ytmx-bg) !important;
+  --ytmusic-nav-bar: var(--ytmx-glass) !important;
+  --ytmusic-player-bar-background: var(--ytmx-glass) !important;
+  --ytmusic-guide-divider: transparent !important;
+  --ytmusic-divider: rgba(255, 255, 255, 0.06) !important;
+  background: var(--ytmx-bg) !important;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.18) transparent !important;
+
+  /* The icons are SVG, so a font change does not break them. */
+  * {
+    font-family: var(--ytmx-font) !important;
+  }
+
+  /* Glass bars: the page content shows blurred behind them. */
+  #nav-bar-background.ytmusic-app-layout,
+  #player-bar-background.ytmusic-app-layout,
+  #mini-guide-background.ytmusic-app-layout {
+    -webkit-backdrop-filter: blur(24px) saturate(1.4);
+    backdrop-filter: blur(24px) saturate(1.4);
+    border: none !important;
+  }
+  ytmusic-player-bar {
+    background: transparent !important;
+  }
+
+  /* Rounded artwork. Circle crops (artists) keep their shape. */
+  ytmusic-thumbnail-renderer:not([thumbnail-crop="MUSIC_THUMBNAIL_CROP_CIRCLE"])
+    :is(yt-img-shadow, img),
+  ytmusic-two-row-item-renderer:not([has-circle-cropped-thumbnail])
+    :is(.thumbnail-overlay, .ripple) {
+    border-radius: var(--ytmx-radius) !important;
+    overflow: hidden;
+  }
+  ytmusic-responsive-list-item-renderer ytmusic-thumbnail-renderer :is(yt-img-shadow, img),
+  ytmusic-player-queue-item ytmusic-thumbnail-renderer :is(yt-img-shadow, img),
+  ytmusic-player-bar img.image {
+    border-radius: 6px !important;
+  }
+
+  /* Large artwork on the player page. */
+  ytmusic-player[player-page-open]:not([video-mode]) {
+    border-radius: 18px !important;
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6);
+  }
+
+  /* Pill chips and a soft search box. */
+  ytmusic-chip-cloud-chip-renderer a.ytmusic-chip-cloud-chip-renderer {
+    border-radius: 999px !important;
+  }
+  ytmusic-search-box .search-box.ytmusic-search-box {
+    border-radius: 12px !important;
+    border-color: transparent !important;
+  }
+  /* The site opens the suggestion list before it has suggestions. Without
+     this rule, an empty box shows below the search box. */
+  ytmusic-search-box
+    #suggestion-list:not(:has(ytmusic-search-suggestion, ytmusic-responsive-list-item-renderer)) {
+    display: none !important;
+  }
+}
+
+/* ---------- Layout: shelves and cards ---------- */
+
+html:not(.ytmx-no-layout) {
+  @media (min-width: 1150px) {
+    /* Side gutters of 48px, not 100px. */
+    ytmusic-app {
+      --ytmusic-content-width: min(
+        calc(100vw - 96px - var(--ytmusic-guide-width) - var(--ytmusic-scrollbar-width)),
+        1600px
+      ) !important;
+    }
+    /* Five large cards in a row, not six small cards. */
+    ytmusic-carousel[item-size="COLLECTION_STYLE_ITEM_SIZE_MEDIUM"] {
+      --ytmusic-carousel-item-base-width: calc(
+        (var(--ytmusic-content-width) - 4 * var(--ytmusic-carousel-item-margin-right)) / 5
+      ) !important;
+    }
+  }
+
+  /* Each card is a padded surface that becomes brighter on hover. The
+     padding replaces most of the gap between cards. */
+  ytmusic-carousel:not([item-size^="COLLECTION_STYLE_ITEM_SIZE_SMALL"]) {
+    --ytmusic-carousel-item-margin-right: 4px !important;
+  }
+  ytmusic-carousel ytmusic-two-row-item-renderer {
+    box-sizing: border-box;
+    padding: 12px;
+    border-radius: 16px;
+    transition: background-color 0.2s;
+  }
+  ytmusic-carousel ytmusic-two-row-item-renderer:is(:hover, :focus-within) {
+    background-color: rgba(255, 255, 255, 0.07);
+  }
+  ytmusic-carousel ytmusic-two-row-item-renderer a.image-wrapper {
+    width: 100% !important;
+  }
+  /* The shelf title aligns with the artwork, not with the card edge. */
+  ytmusic-carousel-shelf-renderer .header-group {
+    box-sizing: border-box;
+    padding-inline: 12px !important;
+  }
+  ytmusic-carousel-shelf-renderer {
+    margin-bottom: 8px !important;
+  }
+  ytmusic-responsive-list-item-renderer {
+    border-radius: 8px;
+  }
+
+  /* A white play button that moves up into view on hover. */
+  ytmusic-two-row-item-renderer #play-button {
+    --ytmusic-play-button-size: 44px !important;
+    --ytmusic-play-button-background-color: #fff !important;
+    --ytmusic-play-button-active-background-color: #fff !important;
+    --ytmusic-play-button-icon-color: #000 !important;
+    --yt-button-color: #000 !important;
+    transform: translateY(8px);
+    transition: transform 0.2s, opacity 0.2s;
+    filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.4));
+  }
+  ytmusic-two-row-item-renderer:is(:hover, :focus-within) #play-button,
+  ytmusic-two-row-item-renderer #play-button:not([state="default"]) {
+    transform: none;
+  }
+
+  /* Type scale: tight bold shelf titles, quiet secondary text. */
+  ytmusic-carousel-shelf-basic-header-renderer .title {
+    font-size: 24px !important;
+    line-height: 1.2 !important;
+    letter-spacing: -0.02em;
+  }
+  ytmusic-carousel-shelf-basic-header-renderer .strapline {
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.08em;
+  }
+  ytmusic-two-row-item-renderer .title {
+    font-size: 15px !important;
+    font-weight: 600 !important;
+  }
+  ytmusic-two-row-item-renderer .subtitle {
+    font-size: 13px !important;
+    color: rgba(255, 255, 255, 0.6) !important;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    ytmusic-two-row-item-renderer,
+    ytmusic-two-row-item-renderer #play-button {
+      transition: none;
+    }
+  }
+}
+
+/* ---------- Declutter ---------- */
+
+html:not(.ytmx-no-declutter) {
+  ytmusic-mealbar-promo-renderer,
+  ytmusic-statement-banner-renderer,
+  ytmusic-guide-signin-promo-renderer,
+  ytmusic-tastebuilder-shelf-renderer,
+  ytmusic-cast-button,
+  #nav-bar-divider.ytmusic-app-layout {
+    display: none !important;
+  }
+
+  ytmusic-app #guide-wrapper.ytmusic-app {
+    border-right: none !important;
+  }
+}
+
+/* ---------- Clean controls ---------- */
+
+html:not(.ytmx-no-dim) {
+  /* Secondary player controls stay dim until the pointer or the keyboard
+     focus is on the player bar. */
+  ytmusic-player-bar
+    :is(.middle-controls-buttons, .right-controls-buttons).ytmusic-player-bar {
+    opacity: 0.4;
+    transition: opacity 0.2s;
+  }
+  ytmusic-player-bar:is(:hover, :focus-within)
+    :is(.middle-controls-buttons, .right-controls-buttons).ytmusic-player-bar {
+    opacity: 1;
+  }
+
+  /* The shelf arrows show only when the pointer or the focus is on the shelf. */
+  ytmusic-carousel-shelf-renderer .button-group {
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  ytmusic-carousel-shelf-renderer:is(:hover, :focus-within) .button-group {
+    opacity: 1;
+  }
+
+  /* Smaller sidebar labels. */
+  ytmusic-guide-entry-renderer {
+    font-size: 15px !important;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    ytmusic-player-bar * {
+      transition: none !important;
+    }
+  }
+}
+
+/* ---------- Ambient mode ---------- */
+
+html:not(.ytmx-no-ambient) {
+  /* The bars get a lighter tint, so the canvas color shows through them. */
+  --ytmx-glass: rgba(11, 11, 15, 0.4);
+
+  /* The canvas is behind the page. The html background is behind the canvas. */
+  #ytmx-ambient {
+    position: fixed;
+    inset: -15%;
+    width: 130%;
+    height: 130%;
+    z-index: -1;
+    pointer-events: none;
+    opacity: var(--ytmx-ambient-opacity);
+    filter: blur(var(--ytmx-ambient-blur)) saturate(1.6);
+  }
+
+  /* Opaque surfaces become transparent, so the canvas shows through.
+     The body is a black strip at the top of the page. */
+  body,
+  ytmusic-player-page,
+  ytmusic-app #guide-wrapper.ytmusic-app {
+    background: transparent !important;
+  }
+
+  /* No page content scrolls below the sidebar, or below the bars when the
+     player page is open. These surfaces need no glass, and without the
+     glass the canvas fills the full window. */
+  #mini-guide-background.ytmusic-app-layout,
+  ytmusic-app-layout[player-page-open]
+    :is(#nav-bar-background, #player-bar-background).ytmusic-app-layout {
+    background: transparent !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  /* The player page is now transparent, so hide the page that is below it. */
+  ytmusic-app-layout > [slot="content"] {
+    transition: opacity 0.3s;
+  }
+  ytmusic-app-layout[player-page-open] > [slot="content"] {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* Header images fade into the canvas, not into a solid color.
+     The site repeats this gradient down the page. That is invisible when
+     the gradient ends in the page color, but not when it ends transparent. */
+  .background-gradient.ytmusic-browse-response {
+    background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.6), transparent) !important;
+    background-repeat: no-repeat !important;
+  }
+  .immersive-background.ytmusic-browse-response ytmusic-fullbleed-thumbnail-renderer {
+    -webkit-mask-image: linear-gradient(to bottom, #000 30%, transparent);
+    mask-image: linear-gradient(to bottom, #000 30%, transparent);
+  }
+}
+
+/* When ambient mode is off, the canvas has no styles from the block above. */
+html.ytmx-no-ambient #ytmx-ambient {
+  display: none;
+}
+
+/* ---------- Floating panels ---------- */
+
+/* This block must stay after the ambient block. Its player bar rule has the
+   same specificity as the ambient rule that removes the bar background. */
+html:not(.ytmx-no-panels) {
+  --ytmx-gap: 12px;
+  --ytmx-panel: rgba(255, 255, 255, 0.055);
+  --ytmx-panel-radius: 20px;
+
+  /* The player bar is a floating pill. */
+  ytmusic-app-layout > [slot="player-bar"],
+  ytmusic-app-layout[player-page-open] #player-bar-background.ytmusic-app-layout,
+  #player-bar-background.ytmusic-app-layout {
+    left: var(--ytmx-gap) !important;
+    bottom: var(--ytmx-gap) !important;
+    width: calc(100vw - var(--ytmusic-scrollbar-width) - 2 * var(--ytmx-gap)) !important;
+    border-radius: var(--ytmx-panel-radius);
+  }
+  ytmusic-app-layout[player-page-open] #player-bar-background.ytmusic-app-layout,
+  #player-bar-background.ytmusic-app-layout {
+    /* The same surface as the sidebar panel. Page content scrolls below
+       the pill, so the pill also blurs and darkens what is behind it. */
+    background: var(--ytmx-panel) !important;
+    -webkit-backdrop-filter: blur(30px) saturate(1.4) brightness(0.85) !important;
+    backdrop-filter: blur(30px) saturate(1.4) brightness(0.85) !important;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  }
+  /* The site draws the slider track 16px to the right of the slider box.
+     These values put the track 20px inside each end of the pill. */
+  ytmusic-player-bar #progress-bar {
+    left: 4px !important;
+    width: calc(100% - 40px) !important;
+  }
+
+  /* The open sidebar is a rounded panel that stops above the pill. */
+  ytmusic-guide-renderer:not([is-collapsed]) {
+    box-sizing: border-box;
+    margin-left: var(--ytmx-gap);
+    width: calc(100% - var(--ytmx-gap) - 4px) !important;
+    height: calc(100vh - var(--ytmusic-nav-bar-height) - var(--ytmx-gap)) !important;
+    padding-top: 8px;
+    border-radius: var(--ytmx-panel-radius);
+    background: var(--ytmx-panel);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  }
+  ytmusic-app-layout[player-visible] ytmusic-guide-renderer:not([is-collapsed]) {
+    height: calc(
+      100vh - var(--ytmusic-nav-bar-height) - var(--ytmusic-player-bar-height) - 3 *
+        var(--ytmx-gap)
+    ) !important;
+  }
+}
+
+/* ---------- Now-playing page ---------- */
+
+/* content.js adds #ytmx-np (title and artist line) below the artwork and
+   sets the ytmx-paused class on <html>. */
+html:not(.ytmx-no-nowplaying) {
+  /* Artwork in the center, with the title and the artist line below it. */
+  ytmusic-player-page #main-panel {
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 24px;
+  }
+  /* The 380px is the room for the two bars, the title block, and the gaps.
+     Only the open player page gets this size. The mini player keeps its size. */
+  ytmusic-player-page[player-page-open]:not([video-mode]) #player.ytmusic-player-page {
+    width: min(100%, calc(100vh - 380px)) !important;
+    flex: none !important;
+  }
+  ytmusic-player[player-page-open]:not([video-mode]) {
+    border-radius: 22px !important;
+    transition: transform 0.45s cubic-bezier(0.2, 0, 0.2, 1);
+  }
+  /* The artwork becomes smaller while the track is paused. */
+  &.ytmx-paused ytmusic-player[player-page-open]:not([video-mode]) {
+    transform: scale(0.92);
+  }
+
+  #ytmx-np {
+    max-width: 100%;
+    text-align: center;
+  }
+  #ytmx-np-title,
+  #ytmx-np-byline {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  #ytmx-np-title {
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    color: #fff;
+  }
+  #ytmx-np-byline {
+    margin-top: 8px;
+    font-size: 17px;
+    line-height: 1.3;
+    color: rgba(255, 255, 255, 0.65);
+  }
+
+  /* The queue, lyrics, and related tabs are in a rounded panel. */
+  ytmusic-player-page #side-panel {
+    box-sizing: border-box;
+    padding: 8px 16px 0;
+    margin-bottom: calc(2 * var(--ytmx-gap, 12px));
+    border-radius: var(--ytmx-panel-radius, 20px);
+    background: rgba(255, 255, 255, 0.055);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+    overflow: hidden;
+  }
+
+  /* Large, bold lyrics. */
+  ytmusic-description-shelf-renderer[is-track-lyrics-page] .description {
+    font-size: 22px !important;
+    line-height: 1.6 !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.01em;
+    color: #fff !important;
+  }
+
+  /* Focus mode: content.js adds the #ytmx-focus button, and the button sets
+     the ytmx-focus class on <html>. The artwork goes away, and the panel
+     with the queue or the lyrics takes the center of the page. */
+  #ytmx-focus {
+    position: absolute;
+    top: 16px;
+    right: 24px;
+    z-index: 3;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+    border: 0;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  #ytmx-focus:is(:hover, :focus-visible) {
+    background: rgba(255, 255, 255, 0.2);
+  }
+  &.ytmx-focus ytmusic-player-page #main-panel {
+    display: none !important;
+  }
+  &.ytmx-focus ytmusic-player-page #side-panel {
+    flex: none !important;
+    width: min(760px, 100%) !important;
+    max-width: none !important;
+    margin-inline: auto !important;
+  }
+  &.ytmx-focus ytmusic-description-shelf-renderer[is-track-lyrics-page] :is(.description, .footer) {
+    text-align: center;
+  }
+  &.ytmx-focus ytmusic-description-shelf-renderer[is-track-lyrics-page] .description {
+    font-size: 32px !important;
+    line-height: 1.5 !important;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    ytmusic-player[player-page-open] {
+      transition: none;
+    }
+  }
+}
+
+html.ytmx-no-nowplaying :is(#ytmx-np, #ytmx-focus) {
+  display: none;
+}
+
+/* ---------- Home page structure ---------- */
+
+html:not(.ytmx-no-home) {
+  /* Shelves of song rows (for example "Quick picks") become a grid of
+     tiles: three columns, four rows, artwork flush with the tile edge. */
+  ytmusic-carousel:has(ytmusic-responsive-list-item-renderer) {
+    --ytmusic-carousel-responsive-list-item-width: calc(
+      (var(--ytmusic-content-width) - 2 * 8px) / 3
+    ) !important;
+
+    ul#items {
+      grid-template-rows: repeat(4, 64px) !important;
+      gap: 8px !important;
+    }
+    ytmusic-responsive-list-item-renderer {
+      box-sizing: border-box;
+      height: 64px !important;
+      padding: 0 8px 0 0 !important;
+      border-radius: 10px !important;
+      overflow: hidden;
+      background-color: rgba(255, 255, 255, 0.07);
+      transition: background-color 0.2s;
+    }
+    ytmusic-responsive-list-item-renderer:is(:hover, :focus-within) {
+      background-color: rgba(255, 255, 255, 0.14);
+    }
+    ytmusic-responsive-list-item-renderer .left-items,
+    ytmusic-responsive-list-item-renderer
+      .left-items
+      :is(ytmusic-thumbnail-renderer, yt-img-shadow, img, .thumbnail-overlay) {
+      width: 64px !important;
+      height: 64px !important;
+      border-radius: 0 !important;
+    }
+    ytmusic-responsive-list-item-renderer .left-items {
+      flex: none;
+      margin-right: 14px !important;
+    }
+    ytmusic-responsive-list-item-renderer .title {
+      font-weight: 600 !important;
+    }
+  }
+
+  /* The mood chips stay below the search bar during a scroll. The 24px
+     removes the empty space above the chips when the row is stuck. */
+  ytmusic-section-list-renderer > #header:has(ytmusic-chip-cloud-renderer) {
+    position: sticky;
+    top: 24px;
+    z-index: 3;
+  }
+  ytmusic-app-layout.content-scrolled
+    ytmusic-section-list-renderer
+    > #header:has(ytmusic-chip-cloud-renderer) {
+    background: var(--ytmx-glass);
+    -webkit-backdrop-filter: blur(24px) saturate(1.4);
+    backdrop-filter: blur(24px) saturate(1.4);
+  }
+
+  /* content.js sets this class on a shelf whose title has a word from the
+     "Hide shelves" setting. */
+  .ytmx-hidden-shelf {
+    display: none !important;
+  }
+}
+
+/* ---------- Player bar ---------- */
+
+/* The track and the transport controls change places: track on the left,
+   transport controls in the center. All other styles are the site styles.
+   ponytail: the keyboard tab order stays in the site order. Reorder the DOM
+   in content.js if the tab order must agree with the visual order. */
+html:not(.ytmx-no-playerbar) {
+  ytmusic-player-bar {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
+    grid-template-areas: "middle start end" !important;
+  }
+  ytmusic-player-bar .middle-controls {
+    justify-content: flex-start !important;
+    min-width: 0;
+    padding-left: 16px;
+  }
+  ytmusic-player-bar #left-controls {
+    position: relative;
+    width: auto !important;
+    padding: 0 32px;
+    justify-content: center;
+  }
+  ytmusic-player-bar .left-controls-buttons {
+    gap: 12px;
+    align-items: center;
+  }
+  /* The time is out of the flow, so the play button stays in the center. */
+  ytmusic-player-bar .time-info {
+    position: absolute;
+    left: calc(100% - 20px);
+    white-space: nowrap;
+  }
+}

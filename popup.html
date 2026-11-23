@@ -1,0 +1,88 @@
+<!doctype html>
+<meta charset="utf-8" />
+<title>YTM Restyle</title>
+<style>
+  body {
+    width: 260px;
+    margin: 0;
+    padding: 16px;
+    font: 13px/1.4 system-ui, sans-serif;
+    color: #eee;
+    background: #121216;
+  }
+  h1 {
+    margin: 0 0 12px;
+    font-size: 15px;
+  }
+  label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 6px 0;
+  }
+  input[type='range'],
+  input[type='text'] {
+    width: 120px;
+  }
+  input[type='text'] {
+    box-sizing: border-box;
+    padding: 6px 8px;
+    font: inherit;
+    color: inherit;
+    background: #24242b;
+    border: 0;
+    border-radius: 6px;
+  }
+  input {
+    accent-color: #fff;
+  }
+  hr {
+    border: 0;
+    border-top: 1px solid #2a2a31;
+    margin: 8px 0;
+  }
+  button {
+    width: 100%;
+    margin-top: 8px;
+    padding: 8px;
+    font: inherit;
+    color: inherit;
+    background: #24242b;
+    border: 0;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+</style>
+<h1>YTM Restyle</h1>
+<!-- The name of each input is the setting key. content.js reads the same key.
+     The checked and value attributes are the defaults. They must agree with style.css. -->
+<label>Look <input type="checkbox" name="look" checked /></label>
+<label>Large cards and shelves <input type="checkbox" name="layout" checked /></label>
+<label>Declutter <input type="checkbox" name="declutter" checked /></label>
+<label>Dim secondary controls <input type="checkbox" name="dim" checked /></label>
+<label>Ambient mode <input type="checkbox" name="ambient" checked /></label>
+<label>Floating panels <input type="checkbox" name="panels" checked /></label>
+<label>New now-playing page <input type="checkbox" name="nowplaying" checked /></label>
+<label>Home page tiles and fixed chips <input type="checkbox" name="home" checked /></label>
+<label>Centered player controls <input type="checkbox" name="playerbar" checked /></label>
+<hr />
+<label>
+  Ambient strength
+  <input type="range" name="ambient-opacity" min="0" max="1" step="0.05" value="0.55" />
+</label>
+<label>
+  Ambient blur
+  <input type="range" name="ambient-blur" min="0" max="120" step="4" value="48" data-unit="px" />
+</label>
+<label>
+  Artwork corners
+  <input type="range" name="radius" min="0" max="24" step="1" value="10" data-unit="px" />
+</label>
+<hr />
+<label>
+  Hide shelves
+  <input type="text" name="hide-shelves" placeholder="podcast, video" />
+</label>
+<button id="reset">Reset to defaults</button>
+<script src="popup.js"></script>
