@@ -33,6 +33,11 @@ The extension is not in a browser store. Load it from the source:
 4. Click "Load unpacked" and select the repository folder.
 5. Open or reload `music.youtube.com`.
 
+### Or build it with a coding agent
+
+If you do not want to clone the repository, give [PROMPT.md](PROMPT.md) to
+your coding agent. The agent builds the extension from zero.
+
 ## Settings
 
 Click the extension icon to open the settings. Each change applies
