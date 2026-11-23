@@ -73,8 +73,7 @@ you tested it on.
 ## Credits
 
 The idea for ambient mode comes from
-[YouTube Ambilight](https://github.com/WesselKroos/youtube-ambilight) by
-Wessel Kroos. This project shares no code with it.
+[WesselKroos/youtube-ambilight](https://github.com/WesselKroos/youtube-ambilight).
 
 ## License
 
