@@ -8,6 +8,8 @@ step and no dependencies.
 
 ![Now-playing page](docs/now-playing.jpg)
 
+![Lyrics in focus mode](docs/lyrics-focus.jpg)
+
 ## Features
 
 - **Ambient mode.** The album art or the video shows as a soft color field
