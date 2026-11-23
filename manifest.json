@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "YTM Restyle",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "A cleaner look for YouTube Music.",
   "permissions": ["storage"],
   "action": { "default_title": "YTM Restyle", "default_popup": "popup.html" },

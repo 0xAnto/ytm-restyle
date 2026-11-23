@@ -326,6 +326,13 @@ html:not(.ytmx-no-panels) {
     width: calc(100% - 40px) !important;
   }
 
+  /* The pill is higher than the site player bar, so it covers the bottom
+     of the now-playing page. This padding moves the artwork and the title
+     up, away from the pill. */
+  ytmusic-player-page #main-panel {
+    padding-bottom: calc(2 * var(--ytmx-gap));
+  }
+
   /* The open sidebar is a rounded panel that stops above the pill. */
   ytmusic-guide-renderer:not([is-collapsed]) {
     box-sizing: border-box;
@@ -355,12 +362,12 @@ html:not(.ytmx-no-nowplaying) {
     flex-direction: column !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: 24px;
+    gap: 16px;
   }
-  /* The 380px is the room for the two bars, the title block, and the gaps.
+  /* The 330px is the room for the two bars, the title block, and the gaps.
      Only the open player page gets this size. The mini player keeps its size. */
   ytmusic-player-page[player-page-open]:not([video-mode]) #player.ytmusic-player-page {
-    width: min(100%, calc(100vh - 380px)) !important;
+    width: min(100%, calc(100vh - 330px)) !important;
     flex: none !important;
   }
   ytmusic-player[player-page-open]:not([video-mode]) {
@@ -419,12 +426,14 @@ html:not(.ytmx-no-nowplaying) {
   /* Focus mode: content.js adds the #ytmx-focus button, and the button sets
      the ytmx-focus class on <html>. The artwork goes away, and the panel
      with the queue or the lyrics takes the center of the page. */
+  /* The button sits in the gap between the navigation bar and the side
+     panel, in line with the right edge of the panel. */
   #ytmx-focus {
     position: absolute;
-    top: 16px;
-    right: 24px;
+    top: 5px;
+    right: 56px;
     z-index: 3;
-    padding: 8px 14px;
+    padding: 6px 12px;
     font-size: 13px;
     font-weight: 600;
     color: #fff;
